@@ -33,6 +33,7 @@
   h1{margin:0;font-size:24px;font-weight:800;letter-spacing:-.2px}
   header p{margin:0;color:var(--muted);font-size:15px}
   .hbtns{display:flex;gap:8px;flex-wrap:wrap}
+  body.locked{overflow:hidden}
   .pill{font-weight:700;font-size:15px;padding:9px 15px;border-radius:999px;border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);cursor:pointer;display:flex;align-items:center;gap:7px}
   .pill:hover{background:var(--accent);color:var(--accent-ink)}
   .pill.solid{background:var(--accent);color:var(--accent-ink)}
@@ -54,7 +55,18 @@
   .ghost:disabled{opacity:.4;cursor:not-allowed}
 
   /* toolbar of drop-down buttons */
-  .tools{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .tools{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+  /* scan tile: viewfinder with a moving laser line */
+  .finder{position:relative;width:30px;height:30px;color:var(--accent);background:
+    linear-gradient(currentColor,currentColor) 0 0/10px 3px,linear-gradient(currentColor,currentColor) 0 0/3px 10px,
+    linear-gradient(currentColor,currentColor) 100% 0/10px 3px,linear-gradient(currentColor,currentColor) 100% 0/3px 10px,
+    linear-gradient(currentColor,currentColor) 0 100%/10px 3px,linear-gradient(currentColor,currentColor) 0 100%/3px 10px,
+    linear-gradient(currentColor,currentColor) 100% 100%/10px 3px,linear-gradient(currentColor,currentColor) 100% 100%/3px 10px;
+    background-repeat:no-repeat;border-radius:3px}
+  .finder i{position:absolute;left:5px;right:5px;top:6px;height:2.5px;border-radius:2px;background:#e4572e;box-shadow:0 0 8px #e4572e;animation:laser 1.6s ease-in-out infinite alternate}
+  @keyframes laser{to{top:22px}}
+  @media (prefers-reduced-motion:reduce){.finder i{animation:none;top:14px}}
+  .tool.scan{background:linear-gradient(160deg,var(--card),var(--accent-soft))}
   .tool{border:1.5px solid var(--line);background:var(--card);border-radius:14px;padding:10px 8px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;color:var(--ink);font-size:14px;font-weight:700;box-shadow:var(--shadow)}
   .tool:hover{border-color:var(--accent)}
   .tool[aria-expanded=true]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
@@ -87,14 +99,27 @@
   .num span{font-size:13px;color:var(--muted);padding:0 9px;border-inline-start:1px solid var(--line);direction:ltr}
   .switch{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
   .switch input{width:18px;height:18px;accent-color:var(--accent)}
-  .hlist{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:8px;max-height:46vh;overflow:auto}
-  .hitem{border:1px solid var(--line);border-radius:12px;background:#fff;padding:8px;display:flex;gap:10px;align-items:center}
-  .hitem canvas{width:50px;height:50px;border-radius:6px;flex:none;cursor:pointer}
+  .grab{display:none;width:44px;height:5px;border-radius:9px;background:#d6cfbf;margin:-4px auto 12px}
+  .panel h2{touch-action:none}
+  .backdrop{position:fixed;inset:0;z-index:29;background:rgba(20,18,14,.4);animation:fade .2s}
+  @keyframes fade{from{opacity:0}}
+  /* history: a sheet taking 75% of the screen on every device */
+  .sheet{position:fixed;inset:auto 0 0 0;z-index:30;height:75vh;max-height:none;margin:0 auto;max-width:1000px;border-radius:20px 20px 0 0;display:flex;flex-direction:column;box-shadow:0 -10px 40px rgba(0,0,0,.2);padding-bottom:calc(14px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+  .sheet .grab{display:block}
+  .sheet .hlist{flex:1;overflow:auto}
+  @keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+  .panel.dragging{animation:none;transition:none}
+  .panel.settle{transition:transform .2s ease}
+  .hlist{list-style:none;margin:10px 0 0;padding:2px 2px 6px;display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;align-content:start}
+  .hitem{--c:#1d1b16;min-width:0;position:relative;border:1.5px solid color-mix(in srgb,var(--c) 28%,transparent);border-inline-start:6px solid var(--c);border-radius:14px;background:#fff;padding:12px;display:flex;gap:12px;align-items:center;box-shadow:0 1px 2px rgba(0,0,0,.04);transition:transform .15s,box-shadow .15s}
+  .hitem:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.08)}
+  .hitem canvas{width:72px;height:72px;border-radius:8px;flex:none;cursor:pointer}
+  .hitem .chip{display:inline-block;margin-top:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;background:color-mix(in srgb,var(--c) 12%,#fff);color:var(--c)}
   .hitem .info{flex:1;min-width:0;cursor:pointer}
-  .hitem .ttl{font-weight:700;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .hitem .ttl{font-weight:800;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hitem .lnk{direction:ltr;text-align:right;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .hitem .dt{font-size:12px;color:var(--muted)}
-  .hitem .del{border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:8px;line-height:1}
+  .hitem .del{position:absolute;top:6px;left:6px;border:none;background:none;color:var(--muted);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:8px;line-height:1}
   .hitem .del:hover{background:#fde8e6;color:var(--bad)}
   .empty{color:var(--muted);font-size:14px}
   .muted{color:var(--muted);font-size:13px}
@@ -128,8 +153,10 @@
     header{padding-top:14px} h1{font-size:21px} header p{font-size:13px}
     .colors{grid-template-columns:1fr 1fr!important} .color small{display:none} .color{padding:6px 8px}
     .panel{position:fixed;inset:auto 0 0 0;z-index:30;border-radius:18px 18px 0 0;max-height:50vh;overflow:auto;box-shadow:0 -8px 32px rgba(0,0,0,.18);padding-bottom:calc(16px + env(safe-area-inset-bottom));animation:up .2s ease-out}
-    .hlist{max-height:none}
-    @keyframes up{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+    .panel .grab{display:block}
+    .sheet{max-height:none;overflow:hidden}
+    .tools{gap:8px} .tool{padding:9px 4px;font-size:13px} .tool small{display:none}
+    .hlist{grid-template-columns:minmax(0,1fr)}
   }
 
   /* scanner */
@@ -155,10 +182,6 @@
     <p>كود ثابت يحمل رابطك مباشرة ولا تنتهي صلاحيته</p>
   </div>
   <div class="hbtns">
-    <button class="pill solid" id="scanBtn">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3"/><circle cx="12" cy="12" r="3.2"/></svg>
-      امسح كوداً
-    </button>
     <button class="pill" id="installBtn" hidden>
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
       ثبّته على جهازك
@@ -186,15 +209,21 @@
       <button class="tool" data-panel="pHistory" aria-expanded="false">
         <span class="vis"><span class="cnt" id="tCount">0</span></span>السجل<small>روابطك السابقة</small>
       </button>
+      <button class="tool scan" id="scanBtn">
+        <span class="vis"><span class="finder"><i></i></span></span>امسح كوداً<small>كاميرا أو صورة</small>
+      </button>
     </div>
+    <div class="backdrop" id="backdrop" hidden></div>
 
     <div class="card panel" id="pShape" hidden>
+      <div class="grab" aria-hidden="true"></div>
       <h2>شكل الكود <button class="x" aria-label="إغلاق">✕</button></h2>
       <div class="styles" id="styles"></div>
       <p class="muted" style="margin:10px 0 0">الشكل يشمل الكود والإطار العام ومربع الوسط معاً.</p>
     </div>
 
     <div class="card panel" id="pColors" hidden>
+      <div class="grab" aria-hidden="true"></div>
       <h2>الألوان والإطار <button class="x" aria-label="إغلاق">✕</button></h2>
       <div class="colors">
         <label class="color"><input type="color" id="cFrame"><div><span>الإطار العام</span><small></small></div></label>
@@ -214,8 +243,9 @@
       </div>
     </div>
 
-    <div class="card panel" id="pHistory" hidden>
-      <h2>سجل الروابط <button class="x" aria-label="إغلاق">✕</button></h2>
+    <div class="card panel sheet" id="pHistory" hidden>
+      <div class="grab" aria-hidden="true"></div>
+      <h2><span>سجل الروابط <span class="muted" id="hCount"></span></span><button class="x" aria-label="إغلاق">✕</button></h2>
       <input type="search" id="hSearch" placeholder="ابحث بالعنوان أو الرابط…" hidden>
       <ul class="hlist" id="hList"></ul>
       <div class="empty" id="hEmpty">لا شيء بعد. كل كود تنزّله أو تحفظه يظهر هنا، فتضغط عليه لاستعادته بعنوانه وشكله وألوانه.</div>
@@ -282,7 +312,7 @@
     {id:'sharp', name:'حادّ كالسيف',  mod:'square',  eye:'square',  frame:[0,0,0,0],          box:'square'},
     {id:'candy', name:'ناعم كالحلوى', mod:'rounded', eye:'rounded', frame:[.06,.06,.06,.06],  box:'rounded'},
     {id:'honey', name:'عسل سائل',     mod:'liquid',  eye:'rounded', frame:[.09,.09,.09,.09],  box:'rounded'},
-    {id:'pearl', name:'حبّات لؤلؤ',   mod:'dot',     eye:'rounded', frame:[.12,.12,.12,.12],  box:'circle'},
+    {id:'pearl', name:'حبّات لؤلؤ',   mod:'dot',     eye:'circle', frame:[.12,.12,.12,.12],  box:'circle'},
     {id:'olive', name:'ورق الزيتون',  mod:'leaf',    eye:'leaf',    frame:[.12,0,.12,0],      box:'leaf'},
     {id:'rain',  name:'قطرات مطر',    mod:'rain',    eye:'rounded', frame:[.09,.09,.09,.09],  box:'rounded'},
     {id:'tiles', name:'فسيفساء',      mod:'tile',    eye:'square',  frame:[0,0,0,0],          box:'square'}
@@ -335,7 +365,7 @@
   Array.prototype.forEach.call(document.querySelectorAll('input[name=res]'), function(r){ r.addEventListener('change', syncInputs); });
 
   // ---------- panels (drop-downs) ----------
-  var tools=document.querySelectorAll('.tool');
+  var tools=document.querySelectorAll('.tool[data-panel]');
   function openPanel(id){
     Array.prototype.forEach.call(tools, function(t){
       var on = t.dataset.panel===id;
@@ -343,14 +373,53 @@
       $(t.dataset.panel).hidden = !on;
     });
     // phones: the panel is a bottom sheet, so bring the preview to the top to watch changes live
-    var phone=window.matchMedia('(max-width:820px)').matches;
-    document.body.classList.toggle('sheet-open', !!id && phone);
-    if(id && phone) setTimeout(function(){ document.querySelector('.stage').scrollIntoView({block:'start',behavior:'smooth'}); },60);
+    var phone=window.matchMedia('(max-width:820px)').matches, hist=id==='pHistory';
+    document.body.classList.toggle('sheet-open', !!id && phone && !hist);
+    document.body.classList.toggle('locked', hist);
+    $('backdrop').hidden=!hist;
+    if(hist) renderHistory();
+    if(id && phone && !hist) setTimeout(function(){ document.querySelector('.stage').scrollIntoView({block:'start',behavior:'smooth'}); },60);
   }
   Array.prototype.forEach.call(tools, function(t){
     t.addEventListener('click', function(){ openPanel(t.getAttribute('aria-expanded')==='true' ? null : t.dataset.panel); });
   });
   Array.prototype.forEach.call(document.querySelectorAll('.panel .x'), function(x){ x.addEventListener('click', function(){ openPanel(null); }); });
+  $('backdrop').addEventListener('click', function(){ openPanel(null); });
+
+  // drag a sheet down by its handle or title to close it
+  Array.prototype.forEach.call(document.querySelectorAll('.panel'), function(panel){
+    var startY=0, lastY=0, lastT=0, vel=0, dragging=false;
+    function isSheet(){ return panel.classList.contains('sheet') || window.matchMedia('(max-width:820px)').matches; }
+    function down(e){
+      if(!isSheet() || e.target.closest('.x')) return;
+      if(!e.target.closest('.grab, h2')) return;
+      dragging=true; startY=lastY=e.clientY; lastT=e.timeStamp; vel=0;
+      panel.classList.add('dragging'); panel.classList.remove('settle');
+      try{ panel.setPointerCapture(e.pointerId); }catch(_){}
+    }
+    function move(e){
+      if(!dragging) return;
+      var dy=Math.max(0, e.clientY-startY);
+      vel=(e.clientY-lastY)/Math.max(1,e.timeStamp-lastT); lastY=e.clientY; lastT=e.timeStamp;
+      panel.style.transform='translateY('+dy+'px)';
+    }
+    function up(e){
+      if(!dragging) return; dragging=false;
+      panel.classList.remove('dragging'); panel.classList.add('settle');
+      var dy=Math.max(0, e.clientY-startY);
+      if(dy>panel.offsetHeight*0.25 || vel>0.6){
+        panel.style.transform='translateY(100%)';
+        setTimeout(function(){ openPanel(null); panel.classList.remove('settle'); panel.style.transform=''; },200);
+      } else {
+        panel.style.transform='';
+        setTimeout(function(){ panel.classList.remove('settle'); },200);
+      }
+    }
+    panel.addEventListener('pointerdown', down);
+    panel.addEventListener('pointermove', move);
+    panel.addEventListener('pointerup', up);
+    panel.addEventListener('pointercancel', up);
+  });
   document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ if(!$('scanModal').hidden) closeScanner(); else openPanel(null); } });
 
   // ---------- URL ----------
@@ -387,7 +456,8 @@
   function drawEye(ctx,kind,x,y,cell,dots,bg){
     var s=7*cell;
     ctx.fillStyle=dots; shapePath(ctx,kind,x,y,s); ctx.fill();
-    ctx.fillStyle=bg;   shapePath(ctx,kind,x+cell,y+cell,s-2*cell); ctx.fill();
+    var ri=kind==='circle'?1.15:1; // slightly thicker ring keeps round eyes easy to detect
+    ctx.fillStyle=bg;   shapePath(ctx,kind,x+ri*cell,y+ri*cell,s-2*ri*cell); ctx.fill();
     ctx.fillStyle=dots; shapePath(ctx,kind,x+2*cell,y+2*cell,3*cell); ctx.fill();
   }
   // one module; n = neighbours {u,d,l,r}
@@ -559,15 +629,16 @@
     var q=($('hSearch').value||'').trim().toLowerCase();
     var list=$('hList'); list.innerHTML='';
     $('tCount').textContent=history.length;
+    $('hCount').textContent=history.length ? '('+history.length+')' : '';
     $('hEmpty').hidden = history.length>0;
     $('hSearch').hidden = history.length<6;
     if($('pHistory').hidden) return; // draw thumbnails only when the list is open
     history.filter(function(h){ return !q || (h.title||'').toLowerCase().indexOf(q)>-1 || h.url.toLowerCase().indexOf(q)>-1; })
     .forEach(function(h){
-      var li=document.createElement('li'); li.className='hitem';
+      var li=document.createElement('li'); li.className='hitem'; li.style.setProperty('--c', h.s.dots||'#1d1b16');
       var cv=document.createElement('canvas');
       var info=document.createElement('div'); info.className='info';
-      info.innerHTML='<div class="ttl">'+escapeHtml(h.title||'بدون عنوان')+'</div><div class="lnk">'+escapeHtml(h.url)+'</div><div class="dt">'+fmtDate(h.date)+' · '+escapeHtml(styleOf(h.s.style).name)+'</div>';
+      info.innerHTML='<div class="ttl">'+escapeHtml(h.title||'بدون عنوان')+'</div><div class="lnk">'+escapeHtml(h.url)+'</div><div class="dt">'+fmtDate(h.date)+'</div><span class="chip">'+escapeHtml(styleOf(h.s.style).name)+'</span>';
       var del=document.createElement('button'); del.className='del'; del.title='حذف من السجل'; del.setAttribute('aria-label','حذف'); del.textContent='×';
       cv.onclick=info.onclick=function(){ restore(h); };
       del.onclick=function(){
@@ -579,7 +650,6 @@
     });
   }
   $('hSearch').addEventListener('input', renderHistory);
-  document.querySelector('.tool[data-panel=pHistory]').addEventListener('click', renderHistory);
   $('saveBtn').onclick=function(){
     addToHistory();
     var b=this, t=b.textContent; b.textContent='✓ حُفظ'; setTimeout(function(){b.textContent=t},1500);
