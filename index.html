@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مولّد كود QR</title>
+<meta name="description" content="حوّل أي رابط إلى كود QR ثابت لا تنتهي صلاحيته، بألوانك، ونزّله PNG أو JPG أو PDF.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#fffdf8; --ink:#1d1b16; --muted:#6b665b; --line:#e3ddcf;
+    --accent:#0f5c4d; --accent-ink:#ffffff; --ok:#1f7a3f; --warn:#b4570a; --bad:#b42318;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:Tajawal,"Segoe UI",Tahoma,sans-serif;line-height:1.5}
+  header{max-width:1080px;margin:0 auto;padding:28px 16px 8px}
+  h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.2px}
+  header p{margin:4px 0 0;color:var(--muted);font-size:15px}
+  main{max-width:1080px;margin:0 auto;padding:16px;display:grid;grid-template-columns:1fr 1.05fr;gap:20px;align-items:start}
+  @media (max-width:820px){main{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:18px}
+  .card h2{margin:0 0 12px;font-size:16px;font-weight:700}
+  label.field{display:block;font-size:14px;color:var(--muted);margin-bottom:6px}
+  input[type=url],input[type=text]{width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);direction:ltr;text-align:left}
+  input[type=url]:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .hint{font-size:13px;color:var(--muted);margin-top:6px}
+  .colors{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+  @media (max-width:420px){.colors{grid-template-columns:1fr}}
+  .color{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:#fff;cursor:pointer}
+  .color input[type=color]{width:38px;height:38px;border:none;padding:0;background:none;cursor:pointer;flex:none}
+  .color input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  .color input[type=color]::-webkit-color-swatch{border:1px solid rgba(0,0,0,.15);border-radius:8px}
+  .color span{font-size:14px}
+  .color small{display:block;color:var(--muted);font-size:12px;direction:ltr;text-align:right}
+  .row{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+  .row label{font-size:14px}
+  input[type=range]{flex:1;accent-color:var(--accent);min-width:140px}
+  .switch{display:flex;align-items:center;gap:8px;font-size:14px;cursor:pointer}
+  .switch input{width:18px;height:18px;accent-color:var(--accent)}
+  .presets{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .preset{border:1px solid var(--line);background:#fff;border-radius:999px;padding:5px 10px 5px 6px;display:flex;align-items:center;gap:6px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+  .preset i{display:inline-block;width:18px;height:18px;border-radius:50%;border:1px solid rgba(0,0,0,.1)}
+  .preset:hover{border-color:var(--accent)}
+  .preview{position:sticky;top:16px}
+  .stage{background:repeating-conic-gradient(#ece7db 0 25%,#f7f4ec 0 50%) 0 0/20px 20px;border-radius:12px;padding:20px;display:flex;justify-content:center}
+  canvas#view{width:100%;max-width:400px;aspect-ratio:1;display:block;border-radius:4px}
+  .status{margin-top:12px;padding:10px 12px;border-radius:10px;font-size:14px;background:#f1efe8}
+  .status.ok{background:#e8f4ec;color:var(--ok)}
+  .status.warn{background:#fdf0e3;color:var(--warn)}
+  .status.bad{background:#fde8e6;color:var(--bad)}
+  .status b{font-weight:700}
+  .dl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+  .dl button{font:inherit;font-weight:700;font-size:15px;padding:12px 8px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+  .dl button:hover{filter:brightness(1.1)}
+  .dl button:disabled{opacity:.4;cursor:not-allowed}
+  .size{display:flex;gap:6px;margin-top:12px;align-items:center;flex-wrap:wrap;font-size:14px}
+  .size .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff}
+  .size .seg label{padding:6px 10px;cursor:pointer;font-size:13px;border-inline-start:1px solid var(--line)}
+  .size .seg label:first-child{border-inline-start:none}
+  .size .seg input{display:none}
+  .size .seg input:checked + span{color:var(--accent);font-weight:700}
+  footer{max-width:1080px;margin:0 auto;padding:8px 16px 32px;color:var(--muted);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>مولّد كود QR</h1>
+  <p>كود ثابت يحمل رابطك مباشرة، يُنشأ داخل جهازك، ولا تنتهي صلاحيته.</p>
+</header>
+
+<main>
+  <section>
+    <div class="card">
+      <h2>الرابط</h2>
+      <label class="field" for="url">ألصق الرابط هنا</label>
+      <input id="url" type="url" inputmode="url" autocomplete="off" spellcheck="false" placeholder="https://example.com">
+      <div class="hint" id="urlHint">إذا نسيت https:// سأضيفها تلقائياً.</div>
+    </div>
+
+    <div class="card" style="margin-top:16px">
+      <h2>الألوان</h2>
+      <div class="colors">
+        <label class="color"><input type="color" id="cFrame"><div><span>الإطار العام</span><small></small></div></label>
+        <label class="color"><input type="color" id="cBg"><div><span>خلفية الكود</span><small></small></div></label>
+        <label class="color"><input type="color" id="cDots"><div><span>الكود نفسه</span><small></small></div></label>
+        <label class="color"><input type="color" id="cBox"><div><span>مربع الوسط</span><small></small></div></label>
+        <label class="color"><input type="color" id="cText"><div><span>نص QR</span><small></small></div></label>
+      </div>
+
+      <div class="presets" id="presets"></div>
+
+      <div class="row">
+        <label for="frameW">سُمك الإطار العام</label>
+        <input type="range" id="frameW" min="0" max="12" step="1">
+      </div>
+      <div class="row">
+        <label class="switch"><input type="checkbox" id="showBox"> إظهار مربع QR في الوسط</label>
+      </div>
+    </div>
+  </section>
+
+  <section class="preview">
+    <div class="card">
+      <h2>المعاينة</h2>
+      <div class="stage"><canvas id="view" width="800" height="800" aria-label="معاينة كود QR"></canvas></div>
+      <div class="status" id="status">أدخل رابطاً لإنشاء الكود.</div>
+
+      <div class="size">
+        <span>الدقة:</span>
+        <div class="seg">
+          <label><input type="radio" name="res" value="512"><span>512</span></label>
+          <label><input type="radio" name="res" value="1024" checked><span>1024</span></label>
+          <label><input type="radio" name="res" value="2048"><span>2048</span></label>
+        </div>
+        <span class="hint" style="margin:0">بكسل — 2048 للطباعة الكبيرة</span>
+      </div>
+
+      <div class="dl">
+        <button id="dPng" disabled>PNG</button>
+        <button id="dJpg" disabled>JPG</button>
+        <button id="dPdf" disabled>PDF</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>كل شيء يعمل داخل المتصفح: لا خادم، لا اشتراك، ولا وسيط بين الكود ورابطك.</footer>
+
+<script src="lib/qrcode.js"></script>
+<script src="lib/jsQR.js"></script>
+<script src="lib/jspdf.umd.min.js"></script>
+<script>
+(function(){
+  qrcode.stringToBytes = qrcode.stringToBytesFuncs['UTF-8'];
+
+  var DEFAULTS = {frame:'#0f5c4d', bg:'#ffffff', dots:'#1d1b16', box:'#0f5c4d', text:'#ffffff', frameW:5, showBox:true};
+  var PRESETS = [
+    {name:'كلاسيكي', frame:'#ffffff', bg:'#ffffff', dots:'#000000', box:'#000000', text:'#ffffff'},
+    {name:'أخضر', frame:'#0f5c4d', bg:'#ffffff', dots:'#1d1b16', box:'#0f5c4d', text:'#ffffff'},
+    {name:'أزرق', frame:'#1e3a8a', bg:'#ffffff', dots:'#1e3a8a', box:'#1e3a8a', text:'#ffffff'},
+    {name:'ذهبي', frame:'#8a6d1e', bg:'#fffaf0', dots:'#2a2112', box:'#8a6d1e', text:'#fffaf0'},
+    {name:'عنابي', frame:'#7a1f2b', bg:'#ffffff', dots:'#3b0d14', box:'#7a1f2b', text:'#ffffff'}
+  ];
+
+  var $ = function(id){return document.getElementById(id)};
+  var urlIn=$('url'), view=$('view'), statusEl=$('status');
+  var inputs = {frame:$('cFrame'), bg:$('cBg'), dots:$('cDots'), box:$('cBox'), text:$('cText')};
+  var frameW=$('frameW'), showBox=$('showBox');
+  var btns=[$('dPng'),$('dJpg'),$('dPdf')];
+
+  // ---------- settings (per-browser convenience only) ----------
+  var state = Object.assign({}, DEFAULTS);
+  try { var saved = JSON.parse(localStorage.getItem('qrgen.settings')||'null'); if(saved) Object.assign(state, saved); } catch(e){}
+  function save(){ try{ localStorage.setItem('qrgen.settings', JSON.stringify(state)); }catch(e){} }
+
+  function syncInputs(){
+    Object.keys(inputs).forEach(function(k){ inputs[k].value = state[k]; inputs[k].parentNode.querySelector('small').textContent = state[k].toUpperCase(); });
+    frameW.value = state.frameW; showBox.checked = state.showBox;
+  }
+
+  PRESETS.forEach(function(p){
+    var b=document.createElement('button'); b.type='button'; b.className='preset';
+    b.innerHTML='<i style="background:linear-gradient(135deg,'+p.frame+' 50%,'+p.dots+' 50%)"></i>'+p.name;
+    b.onclick=function(){ ['frame','bg','dots','box','text'].forEach(function(k){state[k]=p[k]}); syncInputs(); save(); render(); };
+    $('presets').appendChild(b);
+  });
+
+  Object.keys(inputs).forEach(function(k){
+    inputs[k].addEventListener('input', function(){ state[k]=this.value; this.parentNode.querySelector('small').textContent=this.value.toUpperCase(); save(); render(); });
+  });
+  frameW.addEventListener('input', function(){ state.frameW=+this.value; save(); render(); });
+  showBox.addEventListener('change', function(){ state.showBox=this.checked; save(); render(); });
+
+  // ---------- URL handling ----------
+  function normalizeUrl(raw){
+    var s=(raw||'').trim();
+    if(!s) return '';
+    if(!/^[a-z][a-z0-9+.-]*:/i.test(s)) s='https://'+s;
+    return s;
+  }
+
+  // ---------- colour helpers ----------
+  function lum(hex){
+    var c=hex.replace('#',''); var rgb=[0,2,4].map(function(i){var v=parseInt(c.substr(i,2),16)/255; return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4)});
+    return 0.2126*rgb[0]+0.7152*rgb[1]+0.0722*rgb[2];
+  }
+  function contrast(a,b){ var x=lum(a), y=lum(b); return (Math.max(x,y)+0.05)/(Math.min(x,y)+0.05); }
+
+  // ---------- drawing ----------
+  function roundRect(ctx,x,y,w,h,r){
+    r=Math.min(r,w/2,h/2); ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath();
+  }
+
+  function makeQR(text){
+    var qr=qrcode(0,'H'); qr.addData(text); qr.make(); return qr;
+  }
+
+  // Draws the full design on a square canvas of `size` px.
+  function draw(canvas, qr, size){
+    canvas.width=size; canvas.height=size;
+    var ctx=canvas.getContext('2d');
+    var N=qr.getModuleCount();
+    var quiet=4;
+    var fw=Math.round(size*state.frameW/100);      // frame thickness
+    var radius=Math.round(size*0.035);
+
+    // frame
+    ctx.fillStyle=state.frame; ctx.fillRect(0,0,size,size);
+    // background inside frame
+    var inner=size-2*fw;
+    ctx.fillStyle=state.bg;
+    if(fw>0){ roundRect(ctx,fw,fw,inner,inner,Math.max(0,radius-fw/2)); ctx.fill(); }
+    else ctx.fillRect(0,0,size,size);
+
+    // modules on integer-snapped grid
+    var cell=inner/(N+2*quiet);
+    var origin=fw+quiet*cell;
+    function edge(i){ return Math.round(origin+i*cell); }
+
+    // centre box (odd count of modules, ~22% of the code width)
+    var k=0, start=0;
+    if(state.showBox){
+      k=Math.floor(N*0.22); if(k%2===0) k-=1; if(k<5) k=5;
+      start=(N-k)/2;
+    }
+    ctx.fillStyle=state.dots;
+    for(var r=0;r<N;r++){
+      for(var c=0;c<N;c++){
+        if(!qr.isDark(r,c)) continue;
+        if(k && r>=start && r<start+k && c>=start && c<start+k) continue;
+        var x0=edge(c), y0=edge(r);
+        ctx.fillRect(x0,y0,edge(c+1)-x0,edge(r+1)-y0);
+      }
+    }
+
+    if(k){
+      var pad=cell*0.45;
+      var bx=edge(start)+pad, by=edge(start)+pad, bs=edge(start+k)-edge(start)-2*pad;
+      ctx.fillStyle=state.box; roundRect(ctx,bx,by,bs,bs,bs*0.18); ctx.fill();
+      ctx.fillStyle=state.text;
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.font='800 '+Math.round(bs*0.46)+'px "Arial Black", Arial, sans-serif';
+      ctx.fillText('QR', bx+bs/2, by+bs/2+bs*0.03);
+    }
+  }
+
+  // ---------- render + self-check ----------
+  var current=null; // {text, qr}
+  var timer=null;
+  function render(){
+    clearTimeout(timer); timer=setTimeout(doRender,120);
+  }
+  function setStatus(cls,html){ statusEl.className='status'+(cls?' '+cls:''); statusEl.innerHTML=html; }
+
+  function doRender(){
+    var text=normalizeUrl(urlIn.value);
+    var ctx=view.getContext('2d');
+    if(!text){
+      current=null; btns.forEach(function(b){b.disabled=true});
+      ctx.clearRect(0,0,view.width,view.height);
+      setStatus('','أدخل رابطاً لإنشاء الكود.'); return;
+    }
+    var qr;
+    try{ qr=makeQR(text); }catch(e){
+      current=null; btns.forEach(function(b){b.disabled=true});
+      ctx.clearRect(0,0,view.width,view.height);
+      setStatus('bad','<b>الرابط طويل جداً</b> على كود QR. جرّب رابطاً أقصر.'); return;
+    }
+    current={text:text, qr:qr};
+    draw(view, qr, 800);
+    btns.forEach(function(b){b.disabled=false});
+
+    // contrast + real scan test on the rendered pixels
+    var cr=contrast(state.dots,state.bg);
+    var inverted=lum(state.dots)>lum(state.bg);
+    var test=document.createElement('canvas'); draw(test, qr, 600);
+    var img=test.getContext('2d').getImageData(0,0,600,600);
+    var res=jsQR(img.data,600,600,{inversionAttempts:'attemptBoth'});
+    var readable=res && res.data===text;
+
+    if(!readable){
+      setStatus('bad','<b>تحذير: الكود غير مقروء بهذه الألوان.</b> زد التباين بين «الكود نفسه» و«خلفية الكود».');
+    } else if(inverted){
+      setStatus('warn','<b>مقروء، لكن انتبه:</b> الكود أفتح من خلفيته، وبعض الهواتف القديمة لا تقرأ الكود المعكوس. الأفضل كود داكن على خلفية فاتحة.');
+    } else if(cr<4){
+      setStatus('warn','<b>مقروء، لكن التباين ضعيف</b> ('+cr.toFixed(1)+':1). قد يصعب مسحه في إضاءة سيئة أو بعد الطباعة.');
+    } else {
+      setStatus('ok','<b>✓ تم فحص الكود ومسحه بنجاح.</b> يقود إلى: <span dir="ltr" style="word-break:break-all">'+escapeHtml(text)+'</span>');
+    }
+  }
+  function escapeHtml(s){ return s.replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]}); }
+
+  urlIn.addEventListener('input', render);
+
+  // ---------- downloads ----------
+  function res(){ return +document.querySelector('input[name=res]:checked').value; }
+  function fileBase(){
+    var host='code';
+    try{ host=new URL(current.text).hostname.replace(/^www\./,'').replace(/[^a-z0-9.-]/gi,'') || 'code'; }catch(e){}
+    var d=new Date(), p=function(n){return (n<10?'0':'')+n};
+    return 'qr-'+host+'-'+d.getFullYear()+p(d.getMonth()+1)+p(d.getDate());
+  }
+  function saveBlob(blob,name){
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){URL.revokeObjectURL(a.href)},4000);
+  }
+  function exportCanvas(){ var c=document.createElement('canvas'); draw(c,current.qr,res()); return c; }
+
+  $('dPng').onclick=function(){ if(!current) return; exportCanvas().toBlob(function(b){saveBlob(b,fileBase()+'.png')},'image/png'); };
+  $('dJpg').onclick=function(){ if(!current) return; exportCanvas().toBlob(function(b){saveBlob(b,fileBase()+'.jpg')},'image/jpeg',0.95); };
+  $('dPdf').onclick=function(){
+    if(!current) return;
+    var c=exportCanvas();
+    var mm=100; // 10 × 10 cm page
+    var pdf=new window.jspdf.jsPDF({unit:'mm',format:[mm,mm],compress:true});
+    pdf.addImage(c.toDataURL('image/png'),'PNG',0,0,mm,mm,undefined,'FAST');
+    pdf.save(fileBase()+'.pdf');
+  };
+
+  syncInputs();
+  render();
+})();
+</script>
+</body>
+</html>
