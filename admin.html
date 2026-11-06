@@ -222,7 +222,21 @@
     var t = data.settings.message || '{الاسم}\n{الرابط}\n{الرمز}';
     return t.split('{الاسم}').join(name).split('{الرابط}').join(linkFor(key)).split('{الرمز}').join(key);
   }
-  function waHref(phone, text){ var n = waNumber(phone); return 'https://wa.me/' + n + '?text=' + encodeURIComponent(text); }
+  // الإرسال من واتساب العادي لا واتساب بيزنس:
+  // على أندرويد نوجّه الرابط إلى تطبيق com.whatsapp مباشرة (وإن لم يكن مثبتاً نعود إلى wa.me).
+  // على آيفون يفتح النظام واتساب العادي أولاً مع wa.me.
+  var IS_ANDROID = /Android/i.test(navigator.userAgent);
+  function waHref(phone, text){
+    var n = waNumber(phone);
+    var web = 'https://wa.me/' + n + '?text=' + encodeURIComponent(text);
+    if (!IS_ANDROID) return web;
+    var q = (n ? 'phone=' + n + '&' : '') + 'text=' + encodeURIComponent(text);
+    return 'intent://send?' + q + '#Intent;scheme=whatsapp;package=com.whatsapp;S.browser_fallback_url=' + encodeURIComponent(web) + ';end';
+  }
+  function setWa(a, phone, text){
+    a.href = waHref(phone, text);
+    if (IS_ANDROID) a.removeAttribute('target'); else a.setAttribute('target', '_blank');
+  }
   function toast(t){ var el = document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el); setTimeout(function(){ el.remove(); }, 2200); }
   function copy(text){
     if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){ toast('نُسخ ✓'); }, function(){ prompt('انسخ:', text); });
@@ -288,7 +302,7 @@
   function openDone(name, phone, key, link, msg){
     doneMsg = msg;
     $('dName').textContent = name; $('dKey').textContent = key; $('dLink').textContent = link;
-    $('dWa').href = waHref(phone, msg);
+    setWa($('dWa'), phone, msg);
     $('dWa').textContent = waNumber(phone) ? 'أرسل إلى ' + name + ' عبر واتساب' : 'أرسل عبر واتساب (اختر المحادثة)';
     $('doneSheet').hidden = false;
   }
@@ -345,7 +359,7 @@
           '<button data-a="toggle" class="' + (off ? '' : 'danger') + '">' + (off ? 'إعادة التفعيل' : 'إيقاف') + '</button>' +
         '</div>';
       card.querySelector('.key').onclick = function(){ copy(c.key); };
-      card.querySelector('a.w').href = waHref(c.phone, message(c.name, c.key));
+      setWa(card.querySelector('a.w'), c.phone, message(c.name, c.key));
       card.querySelector('[data-a=copy]').onclick = function(){ copy(message(c.name, c.key)); };
       card.querySelector('[data-a=reset]').onclick = function(){
         if (!confirm('مسح أجهزة «' + c.name + '»؟ سيستطيع التفعيل من جديد على جهازه الجديد.')) return;
