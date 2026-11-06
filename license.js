@@ -195,7 +195,9 @@
       if (res.ok) { hideGate(); toast('مرحباً ' + (res.name || '') + '، تم تفعيل نسختك ✓'); }
       else {
         if (res.reason === 'invalid') { lic.key = null; save(LS_LIC, lic); }
-        showGate(res.reason || 'invalid', res.reason === 'invalid' ? '' : key);
+        var why = res.reason || 'invalid', pre = why === 'invalid' ? '' : key;
+        showGate(why, pre);
+        if (!cfg.whatsapp) loadConfig().then(function () { if (cfg.whatsapp && overlay) showGate(why, pre); });
       }
     }).catch(function () { showGate('network', key); });
   }

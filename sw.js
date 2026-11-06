@@ -1,7 +1,7 @@
 // Offline support: the app keeps working without internet once opened.
-const CACHE = 'qrgen-v10';
+const CACHE = 'qrgen-v11';
 const ASSETS = [
-  './', 'index.html', 'manifest.webmanifest', 'config.js?v=10', 'license.js?v=10',
+  './', 'index.html', 'manifest.webmanifest', 'config.js?v=11', 'license.js?v=11',
   'lib/qrcode.js', 'lib/jsQR.js', 'lib/jspdf.umd.min.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'
 ];
