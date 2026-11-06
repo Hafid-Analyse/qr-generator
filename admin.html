@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>لوحة التحكم — مولّد QR</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0f5c4d">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#fffdf8; --ink:#1d1b16; --muted:#6b665b; --line:#e3ddcf;
+    --accent:#0f5c4d; --accent-soft:#e3efe9; --ok:#1f7a3f; --warn:#b4570a; --bad:#b42318; --wa:#25d366;
+    --shadow:0 1px 2px rgba(0,0,0,.04),0 8px 24px rgba(0,0,0,.06);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{background:var(--bg);color:var(--ink);font-family:Tajawal,"Segoe UI",Tahoma,sans-serif;line-height:1.5}
+  [hidden]{display:none!important}
+  button,input,select,textarea{font:inherit}
+  .wrap{max-width:900px;margin:0 auto;padding:16px}
+  header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  header img{width:40px;height:40px;border-radius:10px}
+  header h1{margin:0;font-size:21px;font-weight:800;flex:1}
+  .icon-btn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:8px 12px;cursor:pointer;color:var(--ink);font-size:14px;font-weight:700}
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);padding:16px}
+  .card h2{margin:0 0 12px;font-size:17px;font-weight:800}
+  label.f{display:block;font-size:13px;color:var(--muted);margin:0 0 4px}
+  input[type=text],input[type=tel],input[type=password],input[type=search],select,textarea{width:100%;font-size:16px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;color:var(--ink)}
+  textarea{resize:vertical;min-height:44px}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent);outline-offset:1px;border-color:transparent}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .grid .full{grid-column:1/-1}
+  @media (max-width:560px){.grid{grid-template-columns:1fr}}
+  input[type=tel]{direction:ltr;text-align:right}
+  .seg{display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:#fff;width:fit-content}
+  .seg label{padding:9px 16px;cursor:pointer;font-weight:700;border-inline-start:1px solid var(--line)}
+  .seg label:first-child{border-inline-start:none}
+  .seg input{display:none}
+  .seg label:has(input:checked){background:var(--accent);color:#fff}
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:800;font-size:16px;padding:12px 18px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:#fff;cursor:pointer;text-decoration:none}
+  .btn:hover{filter:brightness(1.1)}
+  .btn:disabled{opacity:.5;cursor:wait}
+  .btn.wide{width:100%}
+  .btn.wa{background:var(--wa);border-color:var(--wa);color:#063d1f}
+  .btn.ghost{background:#fff;color:var(--accent)}
+  .err{color:var(--bad);font-size:14px;margin-top:8px;min-height:1em}
+
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+  .stat{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:10px;text-align:center;cursor:pointer}
+  .stat b{display:block;font-size:24px;font-weight:800;line-height:1.1}
+  .stat span{font-size:13px;color:var(--muted)}
+  .stat[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft)}
+  .stat.alert b{color:var(--bad)}
+
+  .tools{display:flex;gap:8px;margin:16px 0 10px}
+  .tools input{flex:1}
+  .list{display:grid;gap:10px}
+  .cust{--c:var(--accent);background:#fff;border:1px solid var(--line);border-inline-start:5px solid var(--c);border-radius:14px;padding:12px 14px}
+  .cust.off{--c:#a8a29a;opacity:.8}
+  .cust.flag{--c:var(--bad);background:#fffafa}
+  .cust .top{display:flex;align-items:flex-start;gap:10px}
+  .cust .who{flex:1;min-width:0}
+  .cust .nm{font-weight:800;font-size:17px}
+  .cust .sub{font-size:13px;color:var(--muted)}
+  .cust .key{font-family:ui-monospace,Menlo,Consolas,monospace;font-weight:700;direction:ltr;background:var(--bg);border-radius:8px;padding:3px 8px;font-size:14px;cursor:pointer;white-space:nowrap}
+  .chip{display:inline-block;font-size:12px;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+  .chip.off{background:#eee;color:#666}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0 2px;font-size:13px;color:var(--muted);align-items:center}
+  .bar{display:inline-flex;gap:3px;vertical-align:middle}
+  .bar i{width:14px;height:8px;border-radius:3px;background:var(--line)}
+  .bar i.on{background:var(--accent)}
+  .alertline{margin-top:6px;font-size:13px;color:var(--bad);font-weight:700}
+  .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .acts button,.acts a{font-size:13px;font-weight:700;padding:7px 11px;border-radius:9px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;text-decoration:none}
+  .acts .w{border-color:var(--wa);color:#128c4a}
+  .acts button:hover{border-color:var(--accent)}
+  .acts .danger:hover{border-color:var(--bad);color:var(--bad)}
+  .empty{color:var(--muted);text-align:center;padding:20px}
+
+  .sheet-bg{position:fixed;inset:0;background:rgba(20,18,14,.5);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+  @media (min-width:600px){.sheet-bg{align-items:center}}
+  .sheet{background:var(--card);width:100%;max-width:460px;border-radius:20px 20px 0 0;padding:20px 18px calc(18px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+  @media (min-width:600px){.sheet{border-radius:20px}}
+  @keyframes up{from{transform:translateY(30px);opacity:0}}
+  .done{text-align:center}
+  .done .big{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:30px;font-weight:800;letter-spacing:3px;direction:ltr;margin:6px 0}
+  .done .lnk{direction:ltr;word-break:break-all;font-size:13px;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px;margin:8px 0 14px}
+  .done .row{display:grid;gap:8px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;z-index:60}
+  .login{max-width:380px;margin:12vh auto 0;text-align:center}
+  .login img{width:64px;height:64px;border-radius:16px}
+  .login h1{font-size:22px;margin:10px 0 4px}
+  .login p{color:var(--muted);margin:0 0 16px}
+  .login .remember{display:flex;align-items:center;gap:8px;justify-content:center;font-size:14px;margin:10px 0}
+  .warnbox{background:#fdf0e3;color:var(--warn);border-radius:12px;padding:12px;font-size:14px;margin-bottom:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- login -->
+  <section class="card login" id="loginView" hidden>
+    <img src="icons/icon-192.png" alt="">
+    <h1>لوحة التحكم</h1>
+    <p>إدارة نسخ «مولّد كود QR»</p>
+    <form id="loginForm">
+      <input type="password" id="pass" autocomplete="current-password" placeholder="كلمة السر" aria-label="كلمة السر">
+      <label class="remember"><input type="checkbox" id="remember"> تذكّرني على هذا الجهاز</label>
+      <button class="btn wide" id="loginBtn">دخول</button>
+      <div class="err" id="loginErr"></div>
+    </form>
+  </section>
+
+  <div class="card warnbox" id="noApi" hidden>لم يُضبط رابط خادم التراخيص بعد في <b>config.js</b>.</div>
+
+  <!-- main -->
+  <section id="mainView" hidden>
+    <header>
+      <img src="icons/icon-192.png" alt="">
+      <h1>لوحة التحكم</h1>
+      <button class="icon-btn" id="refreshBtn">تحديث</button>
+      <button class="icon-btn" id="logoutBtn">خروج</button>
+    </header>
+
+    <div class="stats" id="stats">
+      <button class="stat" data-f="all" aria-pressed="true"><b id="sAll">0</b><span>الكل</span></button>
+      <button class="stat" data-f="active" aria-pressed="false"><b id="sActive">0</b><span>نشط</span></button>
+      <button class="stat" data-f="off" aria-pressed="false"><b id="sOff">0</b><span>موقوف</span></button>
+      <button class="stat alert" data-f="alert" aria-pressed="false"><b id="sAlert">0</b><span>تنبيهات</span></button>
+    </div>
+
+    <div class="card">
+      <h2>زبون جديد</h2>
+      <form id="newForm" class="grid">
+        <div><label class="f" for="nName">الاسم *</label><input type="text" id="nName" required autocomplete="off" placeholder="مثال: مطبعة النور"></div>
+        <div><label class="f" for="nPhone">هاتف واتساب</label><input type="tel" id="nPhone" inputmode="tel" autocomplete="off" placeholder="0555 12 34 56"></div>
+        <div>
+          <label class="f" for="nOrg">الجهة</label>
+          <input type="text" id="nOrg" list="orgs" autocomplete="off" placeholder="مطبعة، مدرسة…">
+          <datalist id="orgs"><option value="مطبعة"><option value="مدرسة"><option value="جمعية"><option value="محل"><option value="مصمم"><option value="فرد"></datalist>
+        </div>
+        <div>
+          <label class="f">عدد الأجهزة</label>
+          <div class="seg" id="nAllowed">
+            <label><input type="radio" name="allowed" value="1">1</label>
+            <label><input type="radio" name="allowed" value="2" checked>2</label>
+            <label><input type="radio" name="allowed" value="3">3</label>
+            <label><input type="radio" name="allowed" value="5">5</label>
+          </div>
+        </div>
+        <div class="full"><label class="f" for="nNotes">ملاحظات</label><textarea id="nNotes" rows="1" placeholder="المبلغ المدفوع، طريقة الدفع…"></textarea></div>
+        <div class="full"><button class="btn wide" id="createBtn">أنشئ النسخة</button><div class="err" id="createErr"></div></div>
+      </form>
+    </div>
+
+    <div class="tools"><input type="search" id="search" placeholder="ابحث بالاسم أو الهاتف أو الرمز…"></div>
+    <div class="list" id="list"></div>
+  </section>
+</div>
+
+<div class="sheet-bg" id="doneSheet" hidden>
+  <div class="sheet done">
+    <div style="font-size:15px;color:var(--muted)">نسخة <b id="dName" style="color:var(--ink)"></b> جاهزة</div>
+    <div class="big" id="dKey"></div>
+    <div class="lnk" id="dLink"></div>
+    <div class="row">
+      <a class="btn wa wide" id="dWa" target="_blank" rel="noopener">أرسل عبر واتساب</a>
+      <button class="btn ghost wide" id="dCopy">نسخ الرسالة</button>
+      <button class="btn ghost wide" id="dClose">تم</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script>
+(function(){
+  var API = window.QR_LICENSE_API;
+  var $ = function(id){ return document.getElementById(id); };
+  var pass = null, data = { customers: [], settings: {} }, filter = 'all';
+  var LS = 'qrgen.admin';
+
+  function getPass(){ try { return sessionStorage.getItem(LS) || localStorage.getItem(LS); } catch(e){ return null; } }
+  function setPass(p, remember){ try { sessionStorage.setItem(LS, p); if (remember) localStorage.setItem(LS, p); } catch(e){} }
+  function clearPass(){ try { sessionStorage.removeItem(LS); localStorage.removeItem(LS); } catch(e){} }
+
+  var REASONS = {
+    wrong_password: 'كلمة السر غير صحيحة.',
+    locked: 'محاولات خاطئة كثيرة. أُقفل الدخول ساعة.',
+    no_password: 'لم تُعيَّن كلمة السر بعد. شغّل «تعيين كلمة سر لوحة التحكم» من قائمة الشيت.',
+    name_required: 'الاسم مطلوب.',
+    invalid: 'الرمز غير موجود.',
+    server_error: 'خطأ في الخادم.',
+    network: 'تعذّر الاتصال. تحقق من الإنترنت.'
+  };
+  function reasonText(r){ return REASONS[r] || ('خطأ: ' + r); }
+
+  function api(action, extra){
+    var body = Object.assign({ action: action, password: pass }, extra || {});
+    return fetch(API, { method:'POST', body: JSON.stringify(body), redirect:'follow' })
+      .then(function(r){ return r.json(); })
+      .catch(function(){ return { ok:false, reason:'network' }; });
+  }
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function waNumber(p){
+    var d = String(p || '').replace(/[^0-9]/g,'');
+    if (!d) return '';
+    if (d.indexOf('00') === 0) d = d.slice(2);
+    if (d.charAt(0) === '0') d = '213' + d.slice(1);
+    return d;
+  }
+  function normKey(k){ return String(k||'').toUpperCase().replace(/[^A-Z0-9]/g,''); }
+  function linkFor(key){ var b = data.settings.appUrl || ''; return b + (b.indexOf('?') > -1 ? '&' : '?') + 'k=' + normKey(key); }
+  function message(name, key){
+    var t = data.settings.message || '{الاسم}\n{الرابط}\n{الرمز}';
+    return t.split('{الاسم}').join(name).split('{الرابط}').join(linkFor(key)).split('{الرمز}').join(key);
+  }
+  function waHref(phone, text){ var n = waNumber(phone); return 'https://wa.me/' + n + '?text=' + encodeURIComponent(text); }
+  function toast(t){ var el = document.createElement('div'); el.className='toast'; el.textContent=t; document.body.appendChild(el); setTimeout(function(){ el.remove(); }, 2200); }
+  function copy(text){
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(function(){ toast('نُسخ ✓'); }, function(){ prompt('انسخ:', text); });
+    else prompt('انسخ:', text);
+  }
+  function ago(iso){
+    if (!iso) return 'لم يُفعَّل بعد';
+    var m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+    if (m < 2) return 'الآن';
+    if (m < 60) return 'منذ ' + m + ' دقيقة';
+    var h = Math.round(m / 60); if (h < 24) return 'منذ ' + h + ' ساعة';
+    var d = Math.round(h / 24); if (d < 31) return 'منذ ' + d + ' يوم';
+    return new Date(iso).toLocaleDateString('ar-DZ');
+  }
+
+  // ---------- views
+  function showLogin(err){ $('loginView').hidden=false; $('mainView').hidden=true; $('loginErr').textContent = err || ''; $('pass').value=''; setTimeout(function(){ $('pass').focus(); }, 50); }
+  function showMain(){ $('loginView').hidden=true; $('mainView').hidden=false; }
+
+  $('loginForm').onsubmit = function(e){
+    e.preventDefault();
+    var p = $('pass').value; if (!p) return;
+    $('loginBtn').disabled = true; $('loginErr').textContent='';
+    pass = p;
+    api('admin_list').then(function(res){
+      $('loginBtn').disabled = false;
+      if (!res.ok){ pass = null; $('loginErr').textContent = reasonText(res.reason); return; }
+      setPass(p, $('remember').checked);
+      data = res; showMain(); render();
+    });
+  };
+  $('logoutBtn').onclick = function(){ clearPass(); pass = null; showLogin(); };
+  $('refreshBtn').onclick = function(){ refresh(true); };
+
+  function refresh(feedback){
+    return api('admin_list').then(function(res){
+      if (!res.ok){ if (res.reason === 'wrong_password'){ clearPass(); showLogin(reasonText(res.reason)); } else toast(reasonText(res.reason)); return; }
+      data = res; render(); if (feedback) toast('تم التحديث');
+    });
+  }
+
+  // ---------- create
+  $('newForm').onsubmit = function(e){
+    e.preventDefault();
+    var name = $('nName').value.trim();
+    if (!name){ $('nName').focus(); return; }
+    var phone = $('nPhone').value.trim();
+    $('createBtn').disabled = true; $('createErr').textContent='';
+    api('admin_create', {
+      name: name, phone: phone, org: $('nOrg').value.trim(),
+      allowed: +document.querySelector('input[name=allowed]:checked').value, notes: $('nNotes').value.trim()
+    }).then(function(res){
+      $('createBtn').disabled = false;
+      if (!res.ok){ $('createErr').textContent = reasonText(res.reason); return; }
+      $('newForm').reset();
+      openDone(name, phone, res.key, res.link, res.message);
+      refresh();
+    });
+  };
+
+  var doneMsg = '';
+  function openDone(name, phone, key, link, msg){
+    doneMsg = msg;
+    $('dName').textContent = name; $('dKey').textContent = key; $('dLink').textContent = link;
+    $('dWa').href = waHref(phone, msg);
+    $('dWa').textContent = waNumber(phone) ? 'أرسل إلى ' + name + ' عبر واتساب' : 'أرسل عبر واتساب (اختر المحادثة)';
+    $('doneSheet').hidden = false;
+  }
+  $('dCopy').onclick = function(){ copy(doneMsg); };
+  $('dClose').onclick = function(){ $('doneSheet').hidden = true; };
+  $('doneSheet').onclick = function(e){ if (e.target === this) this.hidden = true; };
+
+  // ---------- list
+  Array.prototype.forEach.call(document.querySelectorAll('.stat'), function(b){
+    b.onclick = function(){ filter = b.dataset.f; render(); };
+  });
+  $('search').addEventListener('input', render);
+
+  function render(){
+    var cs = data.customers || [];
+    $('sAll').textContent = cs.length;
+    $('sActive').textContent = cs.filter(function(c){ return c.status !== 'موقوف'; }).length;
+    $('sOff').textContent = cs.filter(function(c){ return c.status === 'موقوف'; }).length;
+    $('sAlert').textContent = cs.filter(function(c){ return c.alert; }).length;
+    Array.prototype.forEach.call(document.querySelectorAll('.stat'), function(b){ b.setAttribute('aria-pressed', b.dataset.f === filter ? 'true' : 'false'); });
+    var def = String(data.settings.defaultDevices || 2);
+    var r = document.querySelector('input[name=allowed][value="' + def + '"]'); if (r && !$('nName').value) r.checked = true;
+
+    var q = $('search').value.trim().toLowerCase();
+    var list = cs.filter(function(c){
+      if (filter === 'active' && c.status === 'موقوف') return false;
+      if (filter === 'off' && c.status !== 'موقوف') return false;
+      if (filter === 'alert' && !c.alert) return false;
+      if (!q) return true;
+      if ([c.name, c.phone, c.key, c.org, c.notes].join(' ').toLowerCase().indexOf(q) > -1) return true;
+      var nq = normKey(q);
+      return !!nq && normKey(c.key).indexOf(nq) > -1;
+    });
+    var el = $('list'); el.innerHTML = '';
+    if (!list.length){ el.innerHTML = '<div class="empty">' + (cs.length ? 'لا نتائج.' : 'لا زبائن بعد. أنشئ أول نسخة من الأعلى.') + '</div>'; return; }
+    list.forEach(function(c){
+      var off = c.status === 'موقوف';
+      var card = document.createElement('div');
+      card.className = 'cust' + (off ? ' off' : '') + (c.alert ? ' flag' : '');
+      var bars = ''; for (var i = 0; i < c.allowed; i++) bars += '<i class="' + (i < c.used ? 'on' : '') + '"></i>';
+      card.innerHTML =
+        '<div class="top"><div class="who"><div class="nm">' + esc(c.name) + '</div>' +
+        '<div class="sub">' + esc([c.org, c.phone].filter(Boolean).join(' · ')) + '</div></div>' +
+        '<span class="key" title="نسخ الرمز">' + esc(c.key) + '</span></div>' +
+        '<div class="meta"><span class="chip ' + (off ? 'off' : '') + '">' + esc(c.status) + '</span>' +
+        '<span>الأجهزة <span class="bar">' + bars + '</span> ' + c.used + '/' + c.allowed + '</span>' +
+        '<span>آخر ظهور: ' + esc(ago(c.lastSeen)) + '</span></div>' +
+        (c.alert ? '<div class="alertline">' + esc(c.alert) + '</div>' : '') +
+        (c.notes ? '<div class="sub" style="margin-top:4px">' + esc(c.notes) + '</div>' : '') +
+        '<div class="acts">' +
+          '<a class="w" target="_blank" rel="noopener">واتساب</a>' +
+          '<button data-a="copy">نسخ الرسالة</button>' +
+          '<button data-a="reset">إعادة ضبط الأجهزة</button>' +
+          '<button data-a="toggle" class="' + (off ? '' : 'danger') + '">' + (off ? 'إعادة التفعيل' : 'إيقاف') + '</button>' +
+        '</div>';
+      card.querySelector('.key').onclick = function(){ copy(c.key); };
+      card.querySelector('a.w').href = waHref(c.phone, message(c.name, c.key));
+      card.querySelector('[data-a=copy]').onclick = function(){ copy(message(c.name, c.key)); };
+      card.querySelector('[data-a=reset]').onclick = function(){
+        if (!confirm('مسح أجهزة «' + c.name + '»؟ سيستطيع التفعيل من جديد على جهازه الجديد.')) return;
+        act('admin_reset', { key: c.key }, 'أُعيد الضبط ✓');
+      };
+      card.querySelector('[data-a=toggle]').onclick = function(){
+        var next = off ? 'نشط' : 'موقوف';
+        if (!off && !confirm('إيقاف نسخة «' + c.name + '»؟ (أكواده المطبوعة تبقى تعمل)')) return;
+        act('admin_status', { key: c.key, status: next }, next === 'موقوف' ? 'أُوقفت ✓' : 'فُعّلت ✓');
+      };
+      el.appendChild(card);
+    });
+  }
+  function act(action, extra, okText){
+    api(action, extra).then(function(res){ if (!res.ok) { toast(reasonText(res.reason)); return; } toast(okText); refresh(); });
+  }
+
+  // ---------- start
+  if (!API){ $('noApi').hidden = false; return; }
+  pass = getPass();
+  if (!pass){ showLogin(); return; }
+  showMain();
+  refresh().then(function(){ if (!pass) showLogin(); });
+})();
+</script>
+</body>
+</html>
