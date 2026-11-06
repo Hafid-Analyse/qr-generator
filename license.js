@@ -3,7 +3,7 @@
   var API = window.QR_LICENSE_API;
   if (!API) return; // لا خادم = التطبيق مفتوح
 
-  var LS_LIC = 'qrgen.license', LS_DEV = 'qrgen.device';
+  var LS_LIC = 'qrgen.license', LS_DEV = 'qrgen.device', LS_ADMIN = 'qrgen.admin', LS_OWNER_OK = 'qrgen.ownerOk';
   var DAY = 86400000;
 
   function load(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
@@ -107,6 +107,7 @@
               '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>' +
               'اطلب نسختك عبر واتساب</a>'
             : '<p style="margin:6px 0 0">اطلب نسختك من صاحب التطبيق.</p>') +
+        '<a href="admin.html" style="display:inline-block;margin-top:16px;font-size:13px;color:var(--muted,#6b665b)">دخول المالك</a>' +
       '</div>';
     var input = overlay.querySelector('#licKey');
     if (keyPrefill) input.value = prettyKey(keyPrefill);
@@ -164,7 +165,33 @@
   }
 
   // ------------------------------------------------------------ start
+  // وضع المالك: من سجّل دخوله في لوحة التحكم مع «تذكّرني» على هذا الجهاز لا يحتاج نسخة
+  function ownerPass() { try { return localStorage.getItem(LS_ADMIN); } catch (e) { return null; } }
+  function ownerMode() {
+    var pass = ownerPass();
+    if (!pass) return false;
+    var last = Number(load(LS_OWNER_OK) || 0);
+    if (Date.now() - last > DAY) {
+      api('admin_login', { password: pass }).then(function (res) {
+        if (res && res.ok) save(LS_OWNER_OK, Date.now());
+        else if (res && (res.reason === 'wrong_password' || res.reason === 'no_password')) {
+          try { localStorage.removeItem(LS_ADMIN); localStorage.removeItem(LS_OWNER_OK); } catch (e) {}
+        }
+      }).catch(function () {});
+    }
+    return true;
+  }
+
   function start() {
+    if (ownerMode()) {
+      var b = document.createElement('a');
+      b.href = 'admin.html'; b.textContent = 'المالك · لوحة التحكم';
+      b.style.cssText = 'position:fixed;bottom:12px;left:12px;z-index:20;background:var(--accent,#0f5c4d);color:#fff;font-size:12px;font-weight:700;padding:6px 12px;border-radius:999px;text-decoration:none;box-shadow:0 4px 12px rgba(0,0,0,.15)';
+      document.body.appendChild(b);
+      var pr = new URLSearchParams(location.search);
+      if (pr.has('k')) { pr.delete('k'); var qq = pr.toString(); history.replaceState(null, '', location.pathname + (qq ? '?' + qq : '') + location.hash); }
+      return;
+    }
     var params = new URLSearchParams(location.search);
     var urlKey = normKey(params.get('k'));
     if (params.has('k')) {

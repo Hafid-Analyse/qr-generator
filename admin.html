@@ -110,7 +110,8 @@
     <p>إدارة نسخ «مولّد كود QR»</p>
     <form id="loginForm">
       <input type="password" id="pass" autocomplete="current-password" placeholder="كلمة السر" aria-label="كلمة السر">
-      <label class="remember"><input type="checkbox" id="remember"> تذكّرني على هذا الجهاز</label>
+      <label class="remember"><input type="checkbox" id="remember" checked> تذكّرني على هذا الجهاز</label>
+      <p style="font-size:13px;margin:0 0 10px">مع «تذكّرني» يعمل التطبيق على هذا الجهاز كنسخة المالك، دون رمز تفعيل.</p>
       <button class="btn wide" id="loginBtn">دخول</button>
       <div class="err" id="loginErr"></div>
     </form>
@@ -123,6 +124,7 @@
     <header>
       <img src="icons/icon-192.png" alt="">
       <h1>لوحة التحكم</h1>
+      <a class="icon-btn" href="./" style="text-decoration:none">فتح التطبيق</a>
       <button class="icon-btn" id="refreshBtn">تحديث</button>
       <button class="icon-btn" id="logoutBtn">خروج</button>
     </header>
@@ -186,7 +188,7 @@
 
   function getPass(){ try { return sessionStorage.getItem(LS) || localStorage.getItem(LS); } catch(e){ return null; } }
   function setPass(p, remember){ try { sessionStorage.setItem(LS, p); if (remember) localStorage.setItem(LS, p); } catch(e){} }
-  function clearPass(){ try { sessionStorage.removeItem(LS); localStorage.removeItem(LS); } catch(e){} }
+  function clearPass(){ try { sessionStorage.removeItem(LS); localStorage.removeItem(LS); localStorage.removeItem('qrgen.ownerOk'); } catch(e){} }
 
   var REASONS = {
     wrong_password: 'كلمة السر غير صحيحة.',
@@ -249,6 +251,7 @@
       $('loginBtn').disabled = false;
       if (!res.ok){ pass = null; $('loginErr').textContent = reasonText(res.reason); return; }
       setPass(p, $('remember').checked);
+      try { if ($('remember').checked) localStorage.setItem('qrgen.ownerOk', JSON.stringify(Date.now())); } catch(e){}
       data = res; showMain(); render();
     });
   };
