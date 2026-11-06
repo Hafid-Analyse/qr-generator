@@ -1,7 +1,7 @@
 /* بوابة التفعيل: تربط نسخة الزبون بجهازه عبر خادم التراخيص (Google Apps Script). */
 (function () {
   var API = window.QR_LICENSE_API;
-  if (!API) return; // لا خادم = التطبيق مفتوح
+  if (!API || !window.QR_LICENSE_ENFORCE) return; // القفل مطفأ = التطبيق مفتوح
 
   var LS_LIC = 'qrgen.license', LS_DEV = 'qrgen.device', LS_ADMIN = 'qrgen.admin', LS_OWNER_OK = 'qrgen.ownerOk';
   var DAY = 86400000;
