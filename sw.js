@@ -1,7 +1,7 @@
 // Offline support: the app keeps working without internet once opened.
-const CACHE = 'qrgen-v9';
+const CACHE = 'qrgen-v10';
 const ASSETS = [
-  './', 'index.html', 'manifest.webmanifest', 'config.js', 'license.js',
+  './', 'index.html', 'manifest.webmanifest', 'config.js?v=10', 'license.js?v=10',
   'lib/qrcode.js', 'lib/jsQR.js', 'lib/jspdf.umd.min.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png'
 ];
@@ -25,7 +25,7 @@ self.addEventListener('fetch', e => {
   // Own files: network first (so updates show up), cache when offline.
   if (url.origin === self.location.origin) {
     e.respondWith(
-      fetch(req).then(res => {
+      fetch(new Request(req, { cache: 'no-cache' })).then(res => {
         const copy = res.clone();
         caches.open(CACHE).then(c => c.put(req, copy));
         return res;
