@@ -3,4 +3,4 @@ window.QR_LICENSE_API = 'https://script.google.com/macros/s/AKfycbwBuBTOryZfaQF6
 
 // القفل على التطبيق: false = التطبيق مفتوح للجميع (لوحة التحكم تعمل في الحالتين).
 // true = كل مستعمل يحتاج رمز تفعيل، ما عدا المالك.
-window.QR_LICENSE_ENFORCE = false;
+window.QR_LICENSE_ENFORCE = true;
