@@ -55,6 +55,8 @@
     '.lic .primary{background:var(--accent,#0f5c4d);color:#fff}',
     '.lic .wa{background:#fff;color:#128c4a;border-color:#25d366}',
     '.lic .btn:disabled{opacity:.5;cursor:wait}',
+    '.lic .lic-link{background:none;border:none;color:var(--muted,#6b665b);font:inherit;font-size:14px;margin-top:14px;cursor:pointer;text-decoration:underline}',
+    '.lic form[hidden]{display:none}',
     '.lic .or{display:flex;align-items:center;gap:10px;color:var(--muted,#6b665b);font-size:13px;margin:16px 0 6px}',
     '.lic .or:before,.lic .or:after{content:"";flex:1;height:1px;background:var(--line,#e3ddcf)}',
     '.lic .spin{width:34px;height:34px;border:3px solid var(--line,#e3ddcf);border-top-color:var(--accent,#0f5c4d);border-radius:50%;margin:8px auto 4px;animation:licspin .8s linear infinite}',
@@ -82,6 +84,33 @@
     return 'https://wa.me/' + cfg.whatsapp + '?text=' + encodeURIComponent(txt);
   }
 
+  var WA_ICON = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>';
+
+  // شاشات مخصصة لحالتين يجب أن تكونا واضحتين تماماً
+  var SCREENS = {
+    used: {
+      title: 'هذا الرابط مستعمل',
+      text: 'هذه النسخة مفعّلة على جهاز صاحبها ولا تعمل على جهاز آخر.<br>اطلب نسختك الخاصة.',
+      wa: 'اطلب نسختك', waText: 'وصلني رابط مستعمل، وأريد نسختي الخاصة.'
+    },
+    suspended: {
+      title: 'النسخة موقوفة',
+      text: 'تم إيقاف هذه النسخة. تواصل مع صاحب التطبيق لإعادة تفعيلها.',
+      wa: 'تواصل مع صاحب التطبيق', waText: 'نسختي موقوفة، أريد إعادة تفعيلها.'
+    }
+  };
+
+  function waButton(label, extra, primary) {
+    var wa = waLink(extra);
+    if (!wa) return '<p style="margin:6px 0 0">' + label + ' من صاحب التطبيق.</p>';
+    return '<a class="btn ' + (primary ? 'primary' : 'wa') + '" href="' + wa + '" target="_blank" rel="noopener">' + WA_ICON + label + ' عبر واتساب</a>';
+  }
+
+  function codeForm(hidden) {
+    return '<form id="licForm"' + (hidden ? ' hidden' : '') + '><input id="licKey" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX" maxlength="12" aria-label="رمز التفعيل">' +
+      '<button class="btn primary" id="licGo" type="submit">تفعيل</button></form>';
+  }
+
   function showGate(reason, keyPrefill) {
     if (!overlay) {
       overlay = document.createElement('div');
@@ -91,32 +120,43 @@
       document.body.appendChild(overlay);
     }
     document.documentElement.style.overflow = 'hidden';
+    var sc = SCREENS[reason];
     var m = MESSAGES[reason] || {};
-    var extra = reason === 'used' ? 'رابطي يظهر أنه مستعمل على جهاز آخر.' : '';
-    var wa = waLink(extra);
-    overlay.innerHTML =
-      '<div class="box">' +
-        '<img src="icons/icon-192.png" alt="">' +
-        '<h2>مولّد كود QR</h2>' +
-        '<p>' + MESSAGES.none.p + '</p>' +
+    var html = '<div class="box"><img src="icons/icon-192.png" alt="" id="licLogo">';
+
+    if (sc) {
+      html += '<h2>' + sc.title + '</h2><p>' + sc.text + '</p>' +
+        waButton(sc.wa, sc.waText, true) +
+        '<button type="button" class="lic-link" id="licOther">لديّ رمز تفعيل آخر</button>' +
+        codeForm(true);
+    } else {
+      html += '<h2>مولّد كود QR</h2><p>' + MESSAGES.none.p + '</p>' +
         (m.m ? '<div class="msg ' + m.cls + '">' + m.m + '</div>' : '') +
-        '<form id="licForm"><input id="licKey" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXX-XXXX" maxlength="12" aria-label="رمز التفعيل">' +
-        '<button class="btn primary" id="licGo" type="submit">تفعيل</button></form>' +
+        codeForm(false) +
         '<div class="or">ليست لديك نسخة؟</div>' +
-        (wa ? '<a class="btn wa" href="' + wa + '" target="_blank" rel="noopener">' +
-              '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm5.3 14.2c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-4-4.7-4.2-.1-.2-1.1-1.5-1.1-2.9s.7-2 1-2.3c.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.3 2.4 1.5.3.1.5.1.6-.1l.9-1.1c.2-.3.4-.2.7-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4z"/></svg>' +
-              'اطلب نسختك عبر واتساب</a>'
-            : '<p style="margin:6px 0 0">اطلب نسختك من صاحب التطبيق.</p>') +
-        '<a href="admin.html" style="display:inline-block;margin-top:16px;font-size:13px;color:var(--muted,#6b665b)">دخول المالك</a>' +
-      '</div>';
-    var input = overlay.querySelector('#licKey');
-    if (keyPrefill) input.value = prettyKey(keyPrefill);
-    overlay.querySelector('#licForm').onsubmit = function (e) {
+        waButton('اطلب نسختك', '', false);
+    }
+    overlay.innerHTML = html + '</div>';
+
+    var form = overlay.querySelector('#licForm'), input = overlay.querySelector('#licKey');
+    if (keyPrefill && !sc) input.value = prettyKey(keyPrefill);
+    var other = overlay.querySelector('#licOther');
+    if (other) other.onclick = function () { other.hidden = true; form.hidden = false; input.focus(); };
+    form.onsubmit = function (e) {
       e.preventDefault();
       var k = normKey(input.value);
       if (k.length < 8) { input.focus(); return; }
       doActivate(k);
     };
+
+    // مدخل المالك المخفي: 5 لمسات سريعة على الشعار
+    var logo = overlay.querySelector('#licLogo'), taps = [];
+    logo.addEventListener('click', function () {
+      var now = Date.now();
+      taps = taps.filter(function (t) { return now - t < 2500; });
+      taps.push(now);
+      if (taps.length >= 5) location.href = 'admin.html';
+    });
   }
 
   function showBusy(text) {
